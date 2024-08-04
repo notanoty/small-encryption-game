@@ -1,8 +1,9 @@
 import curses
-# import pprint
 import random
-from colorama import Fore, Back, Style
+# from colorama import Fore, Back, Style
 import shutil
+
+
 
 def get_terminal_size():
     size = shutil.get_terminal_size()
@@ -111,26 +112,32 @@ def decrypt_dictionary(letters_info, decrypt_dictionary):
     return decrepted_dictionary
 
 def show_interface(win, text, decryption_dictionary):
-        text_y_len, _ = encrypted_text_len(text)
-        print_encrypted_text(win, text, decryption_dictionary)
-        letters_info =  count_letters(text)
-        letters_info_decrypted = decrypt_dictionary(letters_info, decryption_dictionary)
+    
+    text_y_len, _ = encrypted_text_len(text)
+    print_encrypted_text(win, text, decryption_dictionary)
+    letters_info =  count_letters(text)
+    letters_info_decrypted = decrypt_dictionary(letters_info, decryption_dictionary)
 
-        win.addstr(text_y_len + 1, 0, "Letter Frequency")
-        letter_info_position = text_y_len + 2
-        
-        for letter_info in letters_info_decrypted.items():
-            if letter_info[0][0] == "1":
-                win.addstr(letter_info_position, 0, f"{letter_info[0][1]} : {letter_info[1]}", curses.color_pair(curses.COLOR_GREEN) )
-            else:
-                win.addstr(letter_info_position, 0, f"{letter_info[0][1]} : {letter_info[1]}" )
-            letter_info_position += 1
+    
+    win.addstr(text_y_len + 1, 0, "Letter Frequency")
+    
+    letter_info_position_y = text_y_len + 2
+    letter_info_position_x = 2
+    for letter_info in letters_info_decrypted.items():
+        if letter_info[0][0] == "1":
+            win.addstr(letter_info_position_y, letter_info_position_x, f"{letter_info[0][1]} : {letter_info[1]}", curses.color_pair(curses.COLOR_GREEN) )
+        else:
+            win.addstr(letter_info_position_y, letter_info_position_x, f"{letter_info[0][1]} : {letter_info[1]}" )
+        letter_info_position_y += 1
 
-        win.addstr(text_y_len + 1, 20, "Decryption Dictionary")
-        decryption_dictionary_position = text_y_len + 2
-        for letter_info in decryption_dictionary.items():
-            win.addstr(decryption_dictionary_position, 20, f"{letter_info[0]} : {letter_info[1]}", curses.color_pair(curses.COLOR_GREEN))
-            decryption_dictionary_position += 1
+    win.addstr(text_y_len + 1, 20, "Decryption Dictionary")
+    decryption_dictionary_position_y = text_y_len + 2
+    decryption_dictionary_position_x =  22
+
+
+    for letter_info in decryption_dictionary.items():
+        win.addstr(decryption_dictionary_position_y, decryption_dictionary_position_x, f"{letter_info[0]} : {letter_info[1]}", curses.color_pair(curses.COLOR_GREEN))
+        decryption_dictionary_position_y += 1
 
 
 def decryption_game(text):
@@ -141,26 +148,30 @@ def decryption_game(text):
     curses.noecho()
     curses.start_color()    
     curses.use_default_colors()
-    
+    logs = []
+    undone_action = []
     for i in range(0, curses.COLORS):
         curses.init_pair(i , i, 0)
 
     while(game):
-        # decrypted_text = text_decryption(text, decryption_dictionary)
-        # print(decryption_dictionary) 
         show_interface(win, text, decryption_dictionary)
-
-
         player_input = chr(win.getch())
         if(player_input in ['R', 'r']):
-            current_letter, replace_letter = command_line(win, ["Replace", "with"], 2 )
-            
+            current_letter, new_letter = command_line(win, ["Replace", "with"], 2 )
             if current_letter not in decryption_dictionary:
-                decryption_dictionary[current_letter] = replace_letter
-            win.clear()
+                decryption_dictionary[current_letter] = new_letter
+            logs.append( ("R", (current_letter, new_letter)) )
+        elif(player_input in ['u', 'U'] and len(logs) > 0):
+            last_action = logs.pop()
+            undone_action.append(last_action)
+            action, info = last_action
+            if action == "R" and info[0] in decryption_dictionary.keys():
+                decryption_dictionary.pop(info[0])
+
         elif(player_input in ['q', 'Q']):        
             break  
 
+        win.clear()
         win.move(0, 0) 
 
 def main():
