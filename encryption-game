@@ -4,5 +4,5 @@ import encrypter
 import os
 encrypter.main()
 os.system("clear")
-print("The game has ended")
+print("The game has ended\nHave a nice day")
 
