@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 import encrypter
-
+import os
 encrypter.main()
-
+os.system("clear")
+print("The game has ended")
 
